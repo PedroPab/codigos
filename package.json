@@ -1,0 +1,28 @@
+{
+  "name": "codigosreferidos",
+  "version": "1.0.0",
+  "description": "Este sera el proyecto donde se controlara todo el sistema de referidos, promociones, cupones y demas de domiburguer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "deploy": "gcloud beta app deploy --no-cache",
+    "gprisma": "npx prisma generate",
+    "log": "gcloud app logs tail -s default"
+  },
+  "keywords": [
+    "codigos",
+    "domiburguer"
+  ],
+  "author": "Pedro Pablo Montes",
+  "license": "MIT",
+  "dependencies": {
+    "@hapi/boom": "^10.0.0",
+    "body-parser": "^1.20.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.3.0",
+    "joi": "^17.7.0"
+  }
+}
