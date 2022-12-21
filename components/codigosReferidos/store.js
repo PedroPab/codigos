@@ -6,114 +6,122 @@ const premios = 'premios'
 
 const numeroPremio = 3//el numero de referidos necesarios para tener un premio
 
-function findCodigo(codigo) {//podemos buscar los codigos de rederios por nombre o todos
-	return new Promise((resolve, reject) => {
-		const ref = db.collection(collection).doc(`C${codigo}`)
+async function findsCodigo() {//podemos buscar los codigos de rederios por nombre o todos
 
-		ref
-			.get()
-			.then((data) => {
-				if (!data.data()) return reject(('no hay ningun codigo con este codigo'))//boom.badre
-				return resolve(data.data())
-			})
-			.catch((error) => reject(error))
-	})
-}
-
-function findReferido(codigo) {//podemos buscar los codigos de rederios por nombre o todos
-	return new Promise((resolve, reject) => {
-		const ref = db.collection(collection).doc(`C${codigo}`)
-
-		ref.collection(referidos)
-			.get()
-			.then((data) => {
-				const rta = []
-				data.forEach(doc => {
-					rta.push({ id: doc.id, data: doc.data() })
-				})
-				return resolve(rta)
-			})
-			.catch((error) => reject(error))
-	})
-}
-
-function findPremio(codigo) {//podemos buscar los codigos de rederios por nombre o todos
-	return new Promise((resolve, reject) => {
-		const ref = db.collection(collection).doc(`C${codigo}`)
-
-		ref.collection(premios)
-			.get()
-			.then((data) => {
-				const rta = []
-				data.forEach(doc => {
-					rta.push({ id: doc.id, data: doc.data() })
-				})
-				return resolve(rta)
-			})
-			.catch((error) => reject(error))
-	})
-}
-
-function addCodigo(codigo, fulldata) {
-	return new Promise(async (resolve, reject) => {
-		const ref = db.collection(collection).doc(`C${codigo}`)
-
-		ref.get().then(data => {//comprobamos que no existe ya el codigo
-			if (data.data()) { return reject('ya hay codigo con este codigo') }
-			ref
-				.set(fulldata)
-				.then(async (data) => {
-
-					return resolve(data)
-				})
-				.catch((error) => reject(error))
+	try {
+		const ref = await db.collection(collection)
+		const snapshop = await ref.get()
+		if (snapshop.empty) throw (boom.notFound('no hay ningun codigo con este codigop'))
+		const rta = []
+		snapshop.forEach(doc => {
+			rta.push({ id: doc.id, ...doc.data() })
 		})
-	})
+		return (rta)
+	} catch (error) {
+		throw error
+	}
 }
 
-function addReferido(codigo, fulldata) {
-	return new Promise(async (resolve, reject) => {
-		const ref = db.collection(collection).doc(`C${codigo}`)
-
-		ref.collection('referidos')
-			.add(fulldata)
-			.then((data) => {
-				return resolve(data)
-			})
-			.catch((error) => reject(error))
-	})
+async function findCodigo(codigo) {//podemos buscar los codigos de rederios por nombre o todos
+	try {
+		const ref = await db.collection(collection).doc(`C${codigo}`)
+		const snapshop = await ref.get()
+		if (!snapshop.exists) throw (boom.notFound('no hay ningun codigo con este codigop'))
+		return (snapshop.data())
+	} catch (error) {
+		throw error
+	}
 }
 
-function addPremio(codigo, date) {
-	return new Promise(async (resolve, reject) => {
-		const ref = db.collection(collection).doc(`C${codigo}`)
+async function findReferido(codigo) {//podemos buscar los codigos de rederios por nombre o todos
+	try {
+		const ref = await db.collection(collection).doc(`C${codigo}`)
+		const snapshop = await ref.collection(referidos).get()
 
-		//comprobamos que tenga sufienetes referidos para dar el premio
-		const cantidadPremio = await findPremio(codigo)
-		const cantidadReferido = await findReferido(codigo)
-		console.log(cantidadReferido.length, numeroPremio, cantidadPremio.length)
-		if ((cantidadReferido.length / numeroPremio) > cantidadPremio.length) {
-			ref.collection('premios')
-				.add({ date })
-				.then((data) => {
-					return resolve(data)
-				})
-				.catch((error) => reject(error))
-		}
-		else {
-			reject('no tienes los sufinetes referidos ')
-		}
+		const rta = []
+		snapshop.forEach(doc => {
+			rta.push({ id: doc.id, ...doc.data() })
+		})
+		return (rta)
 
-
-	})
+	} catch (error) {
+		throw error
+	}
 }
 
+async function findPremio(codigo) {//podemos buscar los codigos de rederios por nombre o todos
+	try {
+		const ref = await db.collection(collection).doc(`C${codigo}`)
+		const snapshop = await ref.collection(premios).get()
+
+		const rta = []
+		snapshop.forEach(doc => {
+			rta.push({ id: doc.id, ...doc.data() })
+		})
+		console.log(rta)
+		return (rta)
+
+	} catch (error) {
+		throw error
+	}
+}
+
+async function addCodigo(fulldata) {
+	try {
+		const ref = db.collection(collection).doc(`C${fulldata.codigo}`)
+		const codigo = await ref.set(fulldata)
+		return 
+
+	} catch (error) {
+		throw error
+	}
+
+}
+
+async function addReferido(fullData) {
+	try {
+		const ref = await db.collection(collection).doc(`C${fullData.codigo}`)
+
+		const addRefe = await ref.collection(referidos).doc()
+			.set({ fullData })
+			return
+	} catch (error) {
+		throw error
+	}
+
+}
+
+async function addPremio(fullData) {
+	try {
+		console.log('hoa')
+		const ref = await db.collection(collection).doc(`C${fullData.codigo}`)
+		const addPremi = await ref.collection(premios).doc()
+			.set({ fullData })
+		return 
+	} catch (error) {
+		throw error
+	}
+}
+
+
+async function putCodigo(fullData, key) {
+	try {
+		const ref = await db.collection(collection).doc(`C${fullData.codigo}`)
+		const update = await ref.update({ [key]: fullData[key] + 1 })
+		return 
+
+	} catch (error) {
+		throw error
+	}
+}
 module.exports = {
+	findsCodigo,
 	findCodigo,
 	findReferido,
 	findPremio,
 	addCodigo,
 	addReferido,
 	addPremio,
+	putCodigo,
 
 }

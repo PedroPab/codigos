@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
     res.redirect('/html/app.html')
 })
 
-console.log(process.env.PORT)
+
 const PORT = process.env.PORT || 8088
 
 app.listen(PORT, () => {

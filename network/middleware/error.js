@@ -9,7 +9,8 @@ function errorBoomHandler(err, req, res, next) {
 	if (err.isBoom) {
 		const { output } = err
 		res.status(output.statusCode).json(output.payload)
-
+		
+		return
 		//response.error(req, res, output.payload, output.statusCode, err)
 	}
 	next(err)
