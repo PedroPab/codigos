@@ -37,12 +37,12 @@ app.use(errorBoomHandler)
 app.use(errorHandler)
 
 app.get("/", (req, res) => {
-    res.redirect('/html/app.html')
+    res.redirect('/codigosReferidos')
 })
 
 
 const PORT = process.env.PORT || 8088
 
 app.listen(PORT, () => {
-	console.log(`Example app listening on localhost:${PORT}`)
+	console.log(`Example app listening on http://localhost:${PORT}`)
 })

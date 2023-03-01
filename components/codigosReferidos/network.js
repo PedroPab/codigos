@@ -5,95 +5,87 @@ const router = express.Router()
 const validatorHandler = require("./../../network/middleware/validators/validators.js")
 const { postCodigo, postReferido } = require("./schema.js")
 
-router.get("/", (req, res, next) => {
-
-	controller.findsCodigo()
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
-})
-
-router.get("/:codigo", (req, res, next) => {
-	const { codigo } = req.params
-
-	controller.findCodigo(codigo)
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
-})
-
-router.get("/referido/:codigo", (req, res, next) => {
-	const { codigo } = req.params
-
-	controller.findReferido(codigo)
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
-})
-
-router.get("/premio/:codigo", (req, res, next) => {
-	const { codigo } = req.params
-
-	controller.findPremio(codigo)
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
-})
-
-router.post("/", validatorHandler(postCodigo, "body"), (req, res, next) => {
-	const { nombre, telefono, codigo } = req.body
-	const fullData = {
-		nombre, telefono, codigo
+router.get("/", async (req, res, next) => {
+	try {
+		const findsCodigo = await controller.findsCodigo()
+		response.success(req, res, findsCodigo, 200)
+	} catch (error) {
+		next(error)
 	}
-	controller
-		.addCodigo(fullData)
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
 })
 
-router.post("/referido/:codigo", validatorHandler(postReferido, "body"), (req, res, next) => {
-	const { codigo } = req.params
-	const { nombre, telefono } = req.body
-	const fullData = {
-		nombre, telefono, codigo
+router.get("/:codigo", async (req, res, next) => {
+	try {
+		const { codigo } = req.params
+
+		const findCodigo = await controller.findCodigo(codigo)
+		response.success(req, res, findCodigo, 200)
+	} catch (error) {
+		next(error)
 	}
-	controller
-		.addReferido(fullData)
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
 })
 
-router.post("/premio/:codigo", (req, res, next) => {
-	const { codigo } = req.params
-	
-	controller
-		.addPremio(codigo)
-		.then((data) => {
-			response.success(req, res, data, 200)
-		})
-		.catch((error) => {
-			next(error)
-		})
+router.get("/referido/:codigo", async (req, res, next) => {
+	try {
+		const { codigo } = req.params
+
+		const findReferido = await controller.findReferido(codigo)
+		response.success(req, res, findReferido, 200)
+	} catch (error) {
+		next(error)
+	}
+})
+
+router.get("/premio/:codigo", async (req, res, next) => {
+	try {
+		const { codigo } = req.params
+
+		const findPremio = await controller.findPremio(codigo)
+		response.success(req, res, findPremio, 200)
+	} catch (error) {
+		next(error)
+	}
+})
+
+router.post("/", validatorHandler(postCodigo, "body"), async (req, res, next) => {
+	try {
+		const { nombre, telefono, codigo } = req.body
+		const fullData = {
+			nombre, telefono, codigo
+		}
+		const addCodigo = await controller.addCodigo(fullData)
+		response.success(req, res, addCodigo, 200)
+
+	} catch (error) {
+		next(error)
+	}
+})
+
+router.post("/referido/:codigo", validatorHandler(postReferido, "body"), async (req, res, next) => {
+	try {
+		const { codigo } = req.params
+		const { nombre, telefono } = req.body
+		const fullData = {
+			nombre, telefono, codigo
+		}
+		const addReferido = await controller.addReferido(fullData)
+		response.success(req, res, addReferido, 200)
+
+	} catch (error) {
+		next(error)
+	}
+})
+
+router.post("/premio/:codigo", async (req, res, next) => {
+	try {
+		const { codigo } = req.params
+
+		const addPremio = await controller.addPremio(codigo)
+		response.success(req, res, addPremio, 200)
+
+	} catch (error) {
+		next(error)
+	}
 })
 
 module.exports = router
