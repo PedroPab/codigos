@@ -1,8 +1,12 @@
 const store = require("./store.js")
 const boom = require("@hapi/boom")
+const bcrypt = require('bcrypt')
+
 
 async function findsCodigo() {//podemos buscar los codigos de rederios por nombre o todos
 	try {
+		console.log('[controller codigosReferidos] findsCodigo')
+
 		const codigoFind = await store.findsCodigo()
 		return codigoFind
 	} catch (error) {
@@ -13,17 +17,29 @@ async function findsCodigo() {//podemos buscar los codigos de rederios por nombr
 
 async function findCodigo(codigo) {//podemos buscar los codigos de rederios por nombre o todos
 	try {
+		console.log('[controller codigosReferidos] findcodigo ')
+		const codigoFind = await store.findCodigo(codigo)
+		delete codigoFind.password
+		return codigoFind
+	} catch (error) {
+		throw error
+	}
+}
+
+async function findCodigoPass(codigo) {//podemos buscar los codigos de rederios por nombre o todos
+	try {
+		console.log('[controller codigosReferidos] findcodigo ')
 		const codigoFind = await store.findCodigo(codigo)
 		return codigoFind
 	} catch (error) {
 		throw error
 	}
-
-
 }
 
 async function findReferido(codigo) {
 	try {
+		console.log('[controller codigosReferidos] findReferido')
+
 		const codigoFind = await findCodigo(codigo)
 		const findReferido = await store.findReferido(codigo)
 		return findReferido
@@ -34,6 +50,8 @@ async function findReferido(codigo) {
 
 async function findPremio(codigo) {
 	try {
+		console.log('[controller codigosReferidos] findPremio')
+
 		const codigoFind = await findCodigo(codigo)
 		const findPreimo = await store.findPremio(codigo)
 		return findPreimo
@@ -46,25 +64,22 @@ async function findPremio(codigo) {
 
 async function addCodigo(data) {
 	try {
+		console.log('[controlle codigoFereridos] addCodigo ')
+		const codigoFind = await findCodigoPass(data.codigo)
+		if (codigoFind) throw boom.badRequest('ya existe in codigo con este codigo')
+		const telefonFind = await store.findTelefono(data.telefono)
+		if (telefonFind) throw boom.badRequest('ya un usuari  con este telefono')
+		console.log('[controlle codigoFereridos] addCodigo , creando nuevo codigo')
 		const fullData = {
 			...data,
 			date: new Date(),
 			totalReferidos: 0,
 			totalPremios: 0,
 		}
-		try {//mira ya esta crado y si manda el erro de de que no hay ningun codigo con ese codo se va al cath y ejecuta el creador de codigo
-			const codigoFind = await findCodigo(fullData.codigo)
-		} catch (error) {
-			const addReferido = await store.addCodigo(fullData)
-			return fullData
-		}
-
-
-		throw boom.badRequest('ya existe in codigo con este codigo')
-
-
-
-		return
+		const hash = await bcrypt.hash(data.password, 10)
+		const addReferido = await store.addCodigo({ ...fullData, password: hash })
+		delete fullData.password
+		return fullData
 	} catch (error) {
 		throw error
 	}
@@ -73,6 +88,8 @@ async function addCodigo(data) {
 
 async function addReferido(data) {
 	try {
+		console.log('[controller codigosReferidos] addReferido')
+
 		const fullData = {
 			...data,
 			date: new Date()
@@ -92,11 +109,13 @@ async function addReferido(data) {
 
 async function addPremio(codigo) {
 	try {
+		console.log('[controller codigosReferidos] addPremio')
+
 		const fullData = {
 			codigo, date: new Date()
 		}
-		const codigoFind = await findCodigo(fullData.codigo)	
-		if ((codigoFind.totalReferidos / 3) <= codigoFind.totalPremios) {
+		const codigoFind = await findCodigo(fullData.codigo)
+		if (Math.floor(codigoFind.totalReferidos / 3) <= codigoFind.totalPremios) {
 
 			throw boom.conflict('no tienes los sufinetes referidos ')
 		}
@@ -113,7 +132,10 @@ async function addPremio(codigo) {
 
 async function updateCodigo(codigo, key) {//para actualizar ya sea el numeto de referido o premio en uno en uno 
 	try {
+		console.log('[controller codigosReferidos] updateCodigo, codigo:',  codigo, key )
 		const codigoFind = await store.findCodigo(codigo)
+		console.log('cnodoi', codigoFind)
+		if(!codigoFind) throw boom.badData('no existe este codigo')
 		const put = await store.putCodigo(codigoFind, key)//le mandamos todo  la data para saber cual es la cantidad antes de actualisar
 		return put
 	} catch (error) {
@@ -130,4 +152,5 @@ module.exports = {
 	addCodigo,
 	addReferido,
 	addPremio,
+	findCodigoPass
 }

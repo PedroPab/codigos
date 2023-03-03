@@ -49,9 +49,9 @@ router.get("/premio/:codigo", async (req, res, next) => {
 
 router.post("/", validatorHandler(postCodigo, "body"), async (req, res, next) => {
 	try {
-		const { nombre, telefono, codigo } = req.body
+		const { nombre, telefono, codigo, password } = req.body
 		const fullData = {
-			nombre, telefono, codigo
+			nombre, telefono, codigo, password
 		}
 		const addCodigo = await controller.addCodigo(fullData)
 		response.success(req, res, addCodigo, 200)
