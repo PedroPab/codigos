@@ -12,7 +12,6 @@ const localStrategy = new Strategy({
 			console.log( 'user')
 
 			const user = await findTelefono(telefono)
-			console.log(user, 'user')
 
 			if (!user) {
 				done(boom.unauthorized(), false)
@@ -25,6 +24,7 @@ const localStrategy = new Strategy({
 				done(boom.unauthorized(), false)
 			}
 			delete user.password
+			
 			done(null, user)
 
 		} catch (error) {
