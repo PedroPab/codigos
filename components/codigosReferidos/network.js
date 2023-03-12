@@ -4,6 +4,8 @@ const controller = require("./controller.js")
 const router = express.Router()
 const validatorHandler = require("./../../network/middleware/validators/validators.js")
 const { postCodigo, postReferido } = require("./schema.js")
+const passport = require("passport")
+const { checkAdminRoles } = require("../../network/middleware/auth.js")
 
 router.get("/", async (req, res, next) => {
 	try {
@@ -76,16 +78,19 @@ router.post("/referido/:codigo", validatorHandler(postReferido, "body"), async (
 	}
 })
 
-router.post("/premio/:codigo", async (req, res, next) => {
-	try {
-		const { codigo } = req.params
+router.post("/premio/:codigo",
+	passport.authenticate('jwt', { session: false }),
+	checkAdminRoles(['admin']),
+	async (req, res, next) => {
+		try {
+			const { codigo } = req.params
 
-		const addPremio = await controller.addPremio(codigo)
-		response.success(req, res, addPremio, 200)
+			const addPremio = await controller.addPremio(codigo)
+			response.success(req, res, addPremio, 200)
 
-	} catch (error) {
-		next(error)
-	}
-})
+		} catch (error) {
+			next(error)
+		}
+	})
 
 module.exports = router
