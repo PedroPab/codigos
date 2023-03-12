@@ -6,9 +6,12 @@ const { refreshToken } = require("firebase-admin/app")
 async function addUser(data) {
 	try {
 		console.log('[controlle users] addUser ')
+		if (!data.role) data.role = 'client'//esto se deberia  de poner un un midelware para mayor control
+
 		const usuarioBuscado = await store.findUserFilter({ telefono: data.telefono })
 		if (usuarioBuscado) {
-			if (usuarioBuscado.role == data.role) throw boom.conflict('ya existe un ususario con este telefono registrado')
+			const yaCreado = usuarioBuscado.find(element => element.role == data.role)
+			if (yaCreado) throw boom.conflict('ya existe un ususario con este telefono registrado')
 		}
 
 		const fullData = {
@@ -33,7 +36,11 @@ async function findUser(data) {//debe recibir un objeto con una sola key y del n
 	try {
 		console.log('[controller users] findUser ')
 		const user = await store.findUserFilter(data)
-		delete user.password
+		if (!user[0]) {
+			throw boom.badData(`no se encontro ningun usuario con este ${Object.keys(data)}`)
+		}
+		console.log(user)
+		delete user[0]?.password
 		return user
 	} catch (error) {
 		throw error

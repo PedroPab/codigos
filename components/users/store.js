@@ -25,7 +25,7 @@ async function findUserFilter(user) {//debe recibir un objeto con una sola key y
 		snapshop.forEach(doc => {
 			rta.push(doc.data())
 		})
-		return rta[0]
+		return rta
 	} catch (error) {
 		throw error
 	}

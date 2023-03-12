@@ -11,12 +11,14 @@ const router = express.Router()
 router.post("/", passport.authenticate("local", { session: false }),
 	async (req, res, next) => {
 		try {
+			console.log(`[network] /`);
+			
 
 			const user = req.user
-			console.log(user)
+			
 			const payload = {
 				sub: user.telefono,
-				role: user.codigo,
+				role: user.role,
 			}
 
 			const token = jwt.sign(payload, config.SECRET)
