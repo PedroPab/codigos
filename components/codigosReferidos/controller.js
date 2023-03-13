@@ -1,6 +1,7 @@
 const store = require("./store.js")
 const boom = require("@hapi/boom")
 const bcrypt = require('bcrypt')
+const controllerUser = require("../users/controller.js")
 
 
 async function findsCodigo() {//podemos buscar los codigos de rederios por nombre o todos
@@ -67,18 +68,22 @@ async function addCodigo(data) {
 		console.log('[controlle codigoFereridos] addCodigo ')
 		const codigoFind = await findCodigoPass(data.codigo)
 		if (codigoFind) throw boom.badRequest('ya existe in codigo con este codigo')
-		const telefonFind = await store.findTelefono(data.telefono)
-		if (telefonFind) throw boom.badRequest('ya un usuari  con este telefono')
+		const user = await controllerUser.findUserFull(data.user.id)
 		console.log('[controlle codigoFereridos] addCodigo , creando nuevo codigo')
 		const fullData = {
-			...data,
+			codigo: data.codigo,
+			user: user.ref,
 			date: new Date(),
 			totalReferidos: 0,
 			totalPremios: 0,
 		}
-		const hash = await bcrypt.hash(data.password, 10)
-		const addReferido = await store.addCodigo({ ...fullData, password: hash })
-		delete fullData.password
+		const addCodigo = await store.addCodigo(fullData)
+		let listaCodigo = [addCodigo.ref]
+		if (user.data.codigos) {
+			listaCodigo = [...user.data.codigos, addCodigo.ref]
+		}
+		const addNewCodigoInUser = await controllerUser.userUpdate({ codigos: listaCodigo }, user.data)
+		delete fullData
 		return fullData
 	} catch (error) {
 		throw error
@@ -132,16 +137,29 @@ async function addPremio(codigo) {
 
 async function updateCodigo(codigo, key) {//para actualizar ya sea el numeto de referido o premio en uno en uno 
 	try {
-		console.log('[controller codigosReferidos] updateCodigo, codigo:',  codigo, key )
+		console.log('[controller codigosReferidos] updateCodigo, codigo:', codigo, key)
 		const codigoFind = await store.findCodigo(codigo)
 		console.log('cnodoi', codigoFind)
-		if(!codigoFind) throw boom.badData('no existe este codigo')
+		if (!codigoFind) throw boom.badData('no existe este codigo')
 		const put = await store.putCodigo(codigoFind, key)//le mandamos todo  la data para saber cual es la cantidad antes de actualisar
 		return put
 	} catch (error) {
 		throw error
 	}
 }
+
+async function findUserByPhone(telefono) {//podemos buscar los codigos de rederios por nombre o todos
+	try {
+		console.log('[controller codigosReferidos] findUserByPhone ')
+		const user = await store.findTelefono(telefono)
+
+		return user
+	} catch (error) {
+		throw error
+	}
+}
+
+
 
 
 module.exports = {
@@ -152,5 +170,6 @@ module.exports = {
 	addCodigo,
 	addReferido,
 	addPremio,
-	findCodigoPass
+	findCodigoPass,
+	findUserByPhone,
 }

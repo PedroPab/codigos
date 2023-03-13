@@ -83,7 +83,7 @@ async function addCodigo(fulldata) {
 
 		const ref = db.collection(collection).doc(`C${fulldata.codigo}`)
 		const codigo = await ref.set(fulldata)
-		return
+		return { data: codigo, ref: ref }
 
 	} catch (error) {
 		throw error
@@ -150,12 +150,13 @@ async function findTelefono(telefono) {
 
 		rta.find(element => element.telefono == telefono)
 		// if (!rta[0]) throw (boom.notFound('no hay ningun codigo con este telefono'))
-		if (!rta[0])return undefined
+		if (!rta[0]) return undefined
 		return (rta[0])
 	} catch (error) {
 		throw error
 	}
 }
+
 module.exports = {
 	findsCodigo,
 	findCodigo,

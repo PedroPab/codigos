@@ -4,7 +4,8 @@ const postCodigo = Joi.object({
 	nombre: Joi.string().min(3),
 	telefono: Joi.string().min(9),
 	codigo: Joi.string().min(3),
-	password: Joi.string().min(8).required()
+	userId: Joi.string(),
+	password: Joi.string().min(8)
 })
 
 const postReferido = Joi.object({

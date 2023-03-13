@@ -9,6 +9,7 @@ async function addUser(data) {
 		if (!data.role) data.role = 'client'//esto se deberia  de poner un un midelware para mayor control
 
 		const usuarioBuscado = await store.findUserFilter({ telefono: data.telefono })
+		console.log(usuarioBuscado);
 		if (usuarioBuscado) {
 			const yaCreado = usuarioBuscado.find(element => element.role == data.role)
 			if (yaCreado) throw boom.conflict('ya existe un ususario con este telefono registrado')
@@ -26,7 +27,7 @@ async function addUser(data) {
 		const dataUser = newUser.data
 
 		delete dataUser.password
-		return fullData
+		return dataUser
 	} catch (error) {
 		throw error
 	}
@@ -39,7 +40,6 @@ async function findUser(data) {//debe recibir un objeto con una sola key y del n
 		if (!user[0]) {
 			throw boom.badData(`no se encontro ningun usuario con este ${Object.keys(data)}`)
 		}
-		console.log(user)
 		delete user[0]?.password
 		return user
 	} catch (error) {
@@ -47,8 +47,35 @@ async function findUser(data) {//debe recibir un objeto con una sola key y del n
 	}
 }
 
+async function findUserFull(id) {
+	try {
+		console.log('[controller users] findUserFull ')
+		const user = await store.findUserFull(id)
+
+		return user
+	} catch (error) {
+		throw error
+	}
+}
+
+async function userUpdate(data, userPre) {//reciebe el caompo que queremos actualisar y al todo el objeot del usruario , en especial el id
+	try {
+		console.log('[controller users] userUpdate ')
+		const user = await store.userUpdate(data, userPre)
+
+		return user
+	} catch (error) {
+		throw error
+	}
+}
+
+
+
 
 module.exports = {
 	addUser,
 	findUser,
+	findUserFull,
+	userUpdate,
+
 }

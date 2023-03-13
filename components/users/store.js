@@ -32,7 +32,37 @@ async function findUserFilter(user) {//debe recibir un objeto con una sola key y
 }
 
 
+async function findUserFull(id) {
+	try {
+		console.log(`[store Users] findUserFull, id '${id}'`)
+
+		const ref = db.collection(collection).doc(id)
+		const snapshop = await ref.get()
+		if (!snapshop) return undefined
+		return { data: snapshop.data(), ref }
+	} catch (error) {
+		throw error
+	}
+}
+
+//actualisamos un user
+async function userUpdate(data, userPre) {
+	try {
+		console.log(`[store Users] userUpdate, id '${userPre.id}'`)
+		const ref = db.collection(collection)
+		const user = await ref.doc(userPre.id).update({
+			...data,
+		})
+		return user
+	} catch (error) {
+		throw error
+	}
+}
+
 module.exports = {
 	addUser,
 	findUserFilter,
+	findUserFull,
+	userUpdate,
+
 }

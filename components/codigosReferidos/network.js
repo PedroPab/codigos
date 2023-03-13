@@ -6,6 +6,8 @@ const validatorHandler = require("./../../network/middleware/validators/validato
 const { postCodigo, postReferido } = require("./schema.js")
 const passport = require("passport")
 const { checkAdminRoles } = require("../../network/middleware/auth.js")
+const controlleUser = require("../users/controller")
+const boom = require("@hapi/boom")
 
 router.get("/", async (req, res, next) => {
 	try {
@@ -27,16 +29,26 @@ router.get("/:codigo", async (req, res, next) => {
 	}
 })
 
-router.get("/referido/:codigo", async (req, res, next) => {
-	try {
-		const { codigo } = req.params
+router.get("/referido/:codigo",
+	passport.authenticate('jwt', { session: false }),
+	checkAdminRoles(['admin', 'client']), async (req, res, next) => {
+		try {
+			let { codigo } = req.params
 
-		const findReferido = await controller.findReferido(codigo)
-		response.success(req, res, findReferido, 200)
-	} catch (error) {
-		next(error)
-	}
-})
+			if (codigo == undefined) {
+				console.log(codigo, 'jj');
+
+				codigo = controller.findUserByPhone(req.user.sub)
+
+			}
+			console.log(codigo, 'jj');
+
+			const findReferido = await controller.findReferido(codigo)
+			response.success(req, res, findReferido, 200)
+		} catch (error) {
+			next(error)
+		}
+	})
 
 router.get("/premio/:codigo", async (req, res, next) => {
 	try {
@@ -49,19 +61,31 @@ router.get("/premio/:codigo", async (req, res, next) => {
 	}
 })
 
-router.post("/", validatorHandler(postCodigo, "body"), async (req, res, next) => {
-	try {
-		const { nombre, telefono, codigo, password } = req.body
-		const fullData = {
-			nombre, telefono, codigo, password
-		}
-		const addCodigo = await controller.addCodigo(fullData)
-		response.success(req, res, addCodigo, 200)
+router.post("/",
+	passport.authenticate('jwt', { session: false }),
+	checkAdminRoles(['admin', 'client']),
+	validatorHandler(postCodigo, "body"), async (req, res, next) => {
+		try {
+			const { codigo } = req.body
+			let user = req.user
+			if (req.user.role == 'admin') {
+				const userCodigo = await controlleUser.findUser({ id: req.body.userId })
+				user = userCodigo[0]
+				if (!user) throw boom.conflict('ingresa un id de usuari para asignar el codigo nuevo')
+			}
 
-	} catch (error) {
-		next(error)
-	}
-})
+			const fullData = {
+				codigo,
+				user: user
+			}
+			console.log('fullData', fullData);
+			const addCodigo = await controller.addCodigo(fullData)
+			response.success(req, res, addCodigo, 200)
+
+		} catch (error) {
+			next(error)
+		}
+	})
 
 router.post("/referido/:codigo", validatorHandler(postReferido, "body"), async (req, res, next) => {
 	try {
